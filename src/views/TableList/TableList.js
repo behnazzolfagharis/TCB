@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { axios } from 'axios'
+import axios from 'axios'
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // core components
@@ -54,31 +54,41 @@ const useStyles = makeStyles(styles);
 
 export default function TableList() {
 
-  const [name, setName] = useState('')
-  const [id, setId] = useState();
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState([]);
-  const [loading, setLoading] = useState(false)
-
-  /*
-for upload file 
-
-  const [selectedFiles, setSelectedFiles] = useState(undefined);
-  const [currentFile, setCurrentFile] = useState(undefined);
-  const [progress, setProgress] = useState(0);
-  const [message, setMessage] = useState("");
-
-  const [fileInfos, setFileInfos] = useState([]);
-
-*/
-
   const classes = useStyles();
-  const handelNameSubmit = (e) => {
-    e.preventDefault();
-    const { value } = e.target.elements.form1
-    setName(value);
-    axios.post('http://biftorserver/api', { name, value })
 
+  const [serverState, setServerState] = useState({
+    submitting: false,
+    status: null
+  })
+
+
+  const handelServerResponse = (ok, msg, form) => {
+    setServerState({
+      submitting: false,
+      status: { ok, msg }
+    })
+    if (ok) {
+      form.reset();
+    }
+
+  }
+
+  const handelSubmit = e => {
+    e.preventDefault();
+    const form = e.target
+    setServerState({ submitting: true });
+    axios({
+      method: "post",
+      url: "https://jsonplaceholder.typicode.com/users",
+      data: new FormData(form)
+    })
+      .then(r => {
+        handelServerResponse(true, "Thanks for your add", form)
+        console.log(r)
+      }).catch(r => {
+        handelServerResponse(false, r.response.data.error, form)
+        console.log(handelServerResponse, "something wrong")
+      })
 
   }
 
@@ -92,76 +102,143 @@ for upload file
 
           </CardHeader>
           <CardBody>
-            <GridItem xs={12} sm={12} md={6}>
+            <Form onSubmit={handelSubmit}>
+              <GridItem xs={12} sm={12} md={6}>
 
-              <Grid container spacing={3}>
+                <Grid container spacing={3}>
 
-                <Grid item xs>
-                  <form onSubmit={handelNameSubmit}>
+                  <Grid item xs>
 
-                    <TextField
-                      label="نام محصول"
-                      id="margin-none"
-                      name="form1"
-                      className={classes.textField}
+
+                    <CustomInput
                       style={{ padding: 20 }}
+                      labelText="نام محصول"
+                      id="name"
+                      name="name"
+                      type="text"
+                      formControlProps={{
+                        fullWidth: false,
+                        required: true
+                      }}
+                      inputProps={{
+                        multiline: true,
+                        rows: 1
+                      }}
+
+
                     />
 
-                  </form>
+
+
+
+
+                  </Grid>
+
+
+                  <Grid item xs>
+
+
+                    <CustomInput
+                      style={{ padding: 20 }}
+                      labelText="ایدی محصول"
+
+
+                      formControlProps={{
+                        fullWidth: false,
+                        required: true
+                      }}
+                      inputProps={{
+                        multiline: true,
+                        rows: 1
+                      }}
+
+                      id="id" type="number" name="id" />
+
+
+
+
+
+                  </Grid>
+
+
+
+                  <Grid item xs>
+
+                    <CustomInput
+                      style={{ padding: 20 }}
+                      labelText="دسته بندی محصول"
+
+                      formControlProps={{
+                        fullWidth: false,
+                        required: true
+                      }}
+                      inputProps={{
+                        multiline: true,
+                        rows: 1
+                      }}
+
+                      id="category" type="text" name="category"
+                    />
+
+                  </Grid>
+
+
                 </Grid>
+              </GridItem>
 
+              <GridItem xs={12} sm={12} md={12} >
 
-                <Grid item xs>
-                  <TextField
-                    label="ای دی محصول"
-                    id="margin-none"
-                    style={{ padding: 20 }}
-                    className={classes.textField}
-
-                  />
-
-                </Grid>
-
-
-              </Grid>
-            </GridItem>
-
-            <GridItem xs={12} sm={12} md={12} >
-
-              <CustomInput
-                style={{ padding: 20 }}
-                labelText="توضیحات محصول"
-                id="about-me"
-                formControlProps={{
-                  fullWidth: true
-                }}
-                inputProps={{
-                  multiline: true,
-                  rows: 5
-                }}
-              />
-            </GridItem>
-
-            <GridItem xs={4} sm={4} md={4} >
-
-              <Form>
-                <Form.File
+                <CustomInput
                   style={{ padding: 20 }}
-                  id="custom-file"
-                  label="بار گزاری عکس محصول "
-                  custom
+                  labelText="توضیحات محصول"
+
+                  formControlProps={{
+                    fullWidth: true,
+                    required: true
+                  }}
+                  inputProps={{
+                    multiline: true,
+                    rows: 5
+                  }}
+
+                  id="description" type="text" name="description"
                 />
-              </Form>
+
+
+              </GridItem>
+
+
+
+
+              <GridItem xs={4} sm={4} md={4} >
+
+                <Form>
+                  <Form.File
+                    style={{ padding: 20 }}
+                    id="custom-file"
+                    label="بار گزاری عکس محصول "
+                    custom
+                  />
+                </Form>
 
 
 
 
 
-            </GridItem>
+              </GridItem>
+              <Button type="submit" color="warning " disabled={serverState.submitting}>ثبت تغییرات </Button>
+              {serverState.status && (
+                <p className={!serverState.status.ok ? "errorMsg" : ""}>
+                  {serverState.status.msg}
+                </p>
+              )}
 
+
+            </Form>
           </CardBody>
           <CardFooter>
-            <Button type="submit" color="warning">ثبت تغییرات </Button>
+
+
           </CardFooter>
 
         </Card>
