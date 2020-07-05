@@ -61,6 +61,20 @@ export default function TableList() {
     status: null
   })
 
+  const [input, setInput] = useState({
+    name: "",
+    id: "",
+    category: ""
+  })
+
+  const handelOnChange = event => {
+    event.persist();
+    setInput(prev => ({
+      ...prev,
+      [event.target.id]: event.target.value
+    }))
+
+  }
 
   const handelServerResponse = (ok, msg, form) => {
     setServerState({
@@ -125,12 +139,10 @@ export default function TableList() {
                         rows: 1
                       }}
 
+                      onChange={handelOnChange}
+                      value={input.name}
 
                     />
-
-
-
-
 
                   </Grid>
 
@@ -152,15 +164,13 @@ export default function TableList() {
                         rows: 1
                       }}
 
-                      id="id" type="number" name="id" />
+                      id="id" type="number" name="id"
+                      onChange={handelOnChange}
+                      value={input.id}
 
-
-
-
+                    />
 
                   </Grid>
-
-
 
                   <Grid item xs>
 
@@ -178,6 +188,10 @@ export default function TableList() {
                       }}
 
                       id="category" type="text" name="category"
+                      onChange={handelOnChange}
+                      value={input.category}
+
+
                     />
 
                   </Grid>
@@ -206,8 +220,6 @@ export default function TableList() {
 
 
               </GridItem>
-
-
 
 
               <GridItem xs={4} sm={4} md={4} >

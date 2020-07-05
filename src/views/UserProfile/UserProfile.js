@@ -1,5 +1,5 @@
-import React from "react";
-// @material-ui/core components
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import { makeStyles } from "@material-ui/core/styles";
 import InputLabel from "@material-ui/core/InputLabel";
 // core components
@@ -13,6 +13,7 @@ import CardAvatar from "components/Card/CardAvatar.js";
 import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
 
+import { Form, } from 'react-bootstrap'
 import avatar from "assets/img/faces/marc.jpg";
 
 const styles = {
@@ -38,6 +39,68 @@ const useStyles = makeStyles(styles);
 
 export default function UserProfile() {
   const classes = useStyles();
+
+
+  const [server, setServer] = useState({
+    submitting: false,
+    status: null
+
+  })
+
+  const [input, setInput] = useState({
+    name: '',
+    lastName: '',
+    city: '',
+    country: '',
+    postalId: ''
+
+  })
+
+
+
+
+  const handelServerRespone = (ok, msg, form) => {
+    setServer({
+      submitting: true,
+      status: { msg, ok }
+
+    })
+    if (ok) {
+      form.reset()
+    }
+
+
+  }
+
+  const handelSubmit = (e) => {
+    e.preventDefault();
+    const form = e.target
+    setServer({ submitting: true })
+    axios({
+      method: 'post',
+      url: "https://jsonplaceholder.typicode.com/users",
+      data: new FormData(form)
+
+    }).then(r => {
+      handelServerRespone(true, "Thank you for your submiting", form)
+    }).catch(r => {
+      handelServerRespone(false, r.response.data.error, form)
+    })
+
+  }
+
+  const handelChange = (event) => {
+    event.persist();
+    setInput((prev) => ({
+      ...prev,
+      [event.target.id]: [event.target.value]
+
+    })
+    )
+
+  }
+
+
   return (
     <div>
       <GridContainer>
@@ -48,66 +111,71 @@ export default function UserProfile() {
               <p className={classes.cardCategoryWhite}>Complete your profile</p>
             </CardHeader>
             <CardBody>
-              <GridContainer>
+              <Form onSubmit={handelSubmit}>
+
+                <GridContainer>
+                  <GridItem xs={12} sm={12} md={6}>
+                    <CustomInput
+                      labelText="نام"
+                      id="first-name"
+                      formControlProps={{
+                        fullWidth: true
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6}>
+                    <CustomInput
+                      labelText="نام خانوادگی"
+                      id="last-name"
+                      formControlProps={{
+                        fullWidth: true
+                      }}
+                    />
+                  </GridItem>
+                </GridContainer>
+                <GridContainer>
+                  <GridItem xs={12} sm={12} md={4}>
+                    <CustomInput
+                      labelText="شهر"
+                      id="city"
+                      formControlProps={{
+                        fullWidth: true
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4}>
+                    <CustomInput
+                      labelText="کشور"
+                      id="country"
+                      formControlProps={{
+                        fullWidth: true
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4}>
+                    <CustomInput
+                      labelText="آدرس"
+                      id="postal-code"
+                      formControlProps={{
+                        fullWidth: true
+                      }}
+                    />
+                  </GridItem>
+                </GridContainer>
 
 
+                <Button type="submit" disabeld={server.submitting} color="primary">ثبت تغییرات </Button>
 
-              </GridContainer>
-              <GridContainer>
-                <GridItem xs={12} sm={12} md={6}>
-                  <CustomInput
-                    labelText="نام"
-                    id="first-name"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={6}>
-                  <CustomInput
-                    labelText="نام خانوادگی"
-                    id="last-name"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-              </GridContainer>
-              <GridContainer>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="شهر"
-                    id="city"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="کشور"
-                    id="country"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="آدرس"
-                    id="postal-code"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-              </GridContainer>
-              <GridContainer>
+                {server.status && (
+                  <p className={!server.status.ok ? "errorMsg" : ""}> {server.status.msg} </p>
+                )}
 
-              </GridContainer>
+
+              </Form>
+
             </CardBody>
             <CardFooter>
-              <Button color="primary">ثبت تغییرات </Button>
+
             </CardFooter>
           </Card>
         </GridItem>
